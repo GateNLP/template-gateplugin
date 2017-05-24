@@ -1,0 +1,8 @@
+<CREOLE-DIRECTORY
+  ID="mypackage.MyPlugin"
+  VERSION="1.0"
+  DESCRIPTION="Short Description"
+  HELPURL="https://some.webpage.com/where/the/plugin/doc.is"
+>
+  <JAR scan="true">MyPlugin.jar</JAR>
+</CREOLE-DIRECTORY>

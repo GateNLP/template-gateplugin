@@ -1,0 +1,14 @@
+/.project
+/MyPlugin.jar
+/build
+/build.properties
+*~
+#*#
+*.class
+TEST-*.xml
+TEST-*.txt
+TESTS-TestSuites.xml
+junit-noframes.html
+hs_err_*.log
+
+

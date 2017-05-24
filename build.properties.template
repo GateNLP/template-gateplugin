@@ -1,0 +1,4 @@
+# path where GATE is installed. 
+# Usually not needed if GATE_HOME is set, but e.g. the Netbeans automatic projects
+# plugin needs it.
+gate.home=/where/gate/is/installed
