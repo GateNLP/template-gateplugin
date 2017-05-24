@@ -33,13 +33,20 @@ import gate.creole.ExecutionException;
 import gate.creole.metadata.Sharable;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-//import java.util.Optional;
 
 /**
  * Abstract base class for all the PRs in this plugin.
- * This is very similar to what the AbstractLanguageAnalyser should have been.
+ * 
+ * This makes it easy to implement a PR where the processing is 
+ * divided into the majorsteps: 1) setting up when running is started, 
+ * 2) processing all documents, 3) finishing after the last document, if any.
+ * <p>
+ * Important: this is not yet handling duplication and multi-threaded 
+ * processing well.
  */
 public abstract class AbstractDocumentProcessor
         extends AbstractLanguageAnalyser
@@ -57,7 +64,7 @@ public abstract class AbstractDocumentProcessor
   protected Throwable throwable;
   
   
-  private static final Object syncObject = new Object();
+  private static final Object SYNCOBJECT = new Object();
   
   protected AtomicInteger nDuplicates = null;
   @Sharable
@@ -99,21 +106,23 @@ public abstract class AbstractDocumentProcessor
     // we always provide the following fields to all PRs which are used for duplicated PRs:
     // nDuplicates is an AtomicInt which gets incremented whenever a resource
     // gets duplicated. 
-    synchronized (syncObject) {
+    synchronized (SYNCOBJECT) {
       if(getNDuplicates() == null) {        
-        System.err.println("DEBUG: creating first instance of PR "+this.getName());
+        logger.debug("Creating first instance of PR "+this.getName());
         setNDuplicates(new AtomicInteger(0));
         setSharedData(new ConcurrentHashMap<String,Object>());
-        System.err.println("DEBUG: created duplicate 0 of PR "+this.getName());
+        logger.debug("Created duplicate 0 of PR "+this.getName());
       } else {
         int thisn = getNDuplicates().addAndGet(1);
         duplicateId = thisn;
-        System.err.println("DEBUG: created duplicate "+thisn+" of PR "+this.getName());
+        logger.debug("Created duplicate "+thisn+" of PR "+this.getName());
       }
+      afterCreate();
     }
     return this;
   }
 
+  
   @Override
   public void execute() throws ExecutionException {
     if (seenDocuments == 0) {
@@ -132,7 +141,7 @@ public abstract class AbstractDocumentProcessor
     if (seenDocuments > 0) {
       afterLastDocument(arg0, arg1);
     } else {
-      finishedNoDocument(arg0, arg1);
+      processingFinished(arg0, arg1);
     }
   }
 
@@ -143,7 +152,7 @@ public abstract class AbstractDocumentProcessor
     if (seenDocuments > 0) {
       afterLastDocument(arg0, null);
     } else {
-      finishedNoDocument(arg0, null);
+      processingFinished(arg0, null);
     }
   }
 
@@ -152,6 +161,7 @@ public abstract class AbstractDocumentProcessor
           throws ExecutionException {
     controller = arg0;
     seenDocuments = 0;
+    processingStarted(arg0);
   }
   
 
@@ -159,30 +169,37 @@ public abstract class AbstractDocumentProcessor
   // New simplified API for the child classes 
   //=====================================================================
   
-  // NOTE: not sure which of these should be abstract (and thus force 
-  // the programmer to implement them even if empty) and which should be
-  // pre-implemented to do nothing. 
+  
+  /**
+   * This gets run right after initialization of the new instance has finished.
+   */
+  public void afterCreate() {
+    // should get overriden by the PR
+  }
+  
+  public int getDocumentsProcessed() {
+    return seenDocuments;
+  }
   
   /**
    * The new method to implement by PRs which derive from this class.
    * This must return a document which will usually be the same object
    * as it was passed.
-   * NOTE: in the future the better option here may be to return 
-   * Optional<Document> or even List<Document>. That way downstream
-   * PRs could be made to not process filtered documents and to process
-   * additional generated documents. 
    * 
    * @param document 
+   * @return  Usually returns the original document wrapped into a list, but
+   * can also return the empty list or several new documents. 
    */
-  protected abstract Document process(Document document);
+  public abstract List<Document> process(Document document);
 
   /**
    * This can be overridden in PRs and will be run once before
    * the first document seen. 
-   * This method is not called if no documents are processed at all. 
+   * This method is not called if no documents are processed at all: it only
+   * runs runs right before the first document is processed.
    * @param ctrl 
    */
-  protected abstract void beforeFirstDocument(Controller ctrl);
+  protected void beforeFirstDocument(Controller ctrl) {};
 
   /**
    * This can be overridden in PRs and will be run after processing has started.
@@ -193,9 +210,20 @@ public abstract class AbstractDocumentProcessor
    */
   protected void processingStarted(Controller ctrl) { };
   
-  protected abstract void afterLastDocument(Controller ctrl, Throwable t);
+  /**
+   * This runs after documents have been processed.
+   * This will not get invoked if no documents have been processed.
+   * @param ctrl
+   * @param t 
+   */
+  protected void afterLastDocument(Controller ctrl, Throwable t) {};
 
-  protected abstract void finishedNoDocument(Controller ctrl, Throwable t);
+  /**
+   * This runs after any documents or even no documents have been processed.
+   * @param ctrl
+   * @param t 
+   */
+  protected void processingFinished(Controller ctrl, Throwable t) {};
   
   protected void benchmarkCheckpoint(long startTime, String name) {
     if (Benchmark.isBenchmarkingEnabled()) {
@@ -217,10 +245,11 @@ public abstract class AbstractDocumentProcessor
   }
   private String benchmarkId = this.getName();
 
-  
-  
-  
-  
+  protected List<Document> documentList(Document... docs)   {
+    List<Document> list = new ArrayList<Document>();
+    for(Document d : docs) list.add(d);
+    return list;
+  }
   
   /**
    * Implement high-level API functions that can be used without importing
@@ -229,11 +258,7 @@ public abstract class AbstractDocumentProcessor
    * @param parms
    * @return 
    */
-  // TODO: not yet, we will implement this once we removed the requirement to
-  // be compatible with Java 7
-  /*
-  protected Optional<Object> call(String methodName, Object... parms) {
-    return Optional.empty();
+  protected List<Object> call(String methodName, Object... parms) {
+    return new ArrayList<Object>();
   }
-  */
 }
