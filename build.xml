@@ -24,7 +24,9 @@
   <property name="gate.lib" location="${gate.home}/lib" />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
   <property name="src.dir" location="src/main/java" />
+  <property name="srctest.dir" location="src/test/java" />
   <property name="classes.dir" location="build/classes" />
+  <property name="classestest.dir" location="build/classestest" />
   <property name="doc.dir" location="doc" />
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
   <property name="jar.location" location="MyPlugin.jar" />
@@ -46,11 +48,20 @@
     </fileset>
   </path>
 
+  <path id="compiletests.classpath">
+    <path refid="compile.classpath" />
+    <pathelement location="${jar.location}" />
+  </path>
 
+  <path id="runtests.classpath">
+    <path refid="compiletests.classpath" />
+    <dirset dir="${classestest.dir}" /> 
+  </path>
   
   <!-- create build directory structure -->
   <target name="prepare">
 	  <mkdir dir="${classes.dir}" />
+	  <mkdir dir="${classestest.dir}" />
 	  <mkdir dir="lib" />
   </target>
 
@@ -64,6 +75,29 @@
 	   target="1.8"
            source="1.8" />
   </target>
+
+  <!-- compile the tests -->
+  <target name="compiletests" depends="jar">
+    <javac classpathref="compiletests.classpath"
+           srcdir="${srctest.dir}"
+           destdir="${classestest.dir}"
+           debug="true"
+	   debuglevel="lines,source"
+	   target="1.8"
+           source="1.8" />
+  </target>
+
+  <target name="testsuite" depends="compiletests">
+    <junit fork="true">
+      <classpath refid="runtests.classpath" />
+      <formatter type="brief" usefile="false" />
+      <formatter type="brief" usefile="true" />
+      <formatter type="xml" />
+      <test name="mypackage.SuiteAllTests" />
+    </junit>
+  </target>
+
+
 
   <!-- Build JavaDoc documentation -->
   <target name="doc.prepare">
@@ -109,6 +143,6 @@
                          distribution
   -->
   <target name="build" depends="jar" />
-  <target name="test" />
+  <target name="test"  depends="testsuite"/>
   <target name="distro.prepare" depends="clean.classes" />
 </project>
