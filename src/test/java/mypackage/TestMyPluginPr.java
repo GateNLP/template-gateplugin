@@ -29,6 +29,18 @@ public class TestMyPluginPr {
    */
   @BeforeClass
   public static void init() throws GateException {
+    // For this to work the property gate.home must point to the location
+    // of where GATE is installed. This will be set properly from the ant
+    // build file, but if we run with Maven, we may not have the property
+    // set here, so we set it to whatever the environment variable GATE_HOME
+    // is set to.
+    if(System.getProperty("gate.home") == null) {
+      String gh = System.getenv("GATE_HOME");
+      if(gh==null) {
+        throw new GateException("Environment variable GATE_HOME not set");
+      }
+      System.setProperty("gate.home",gh);
+    }
     gate.Gate.init();
     // if needed, a plugin that comes with GATE can be loaded here by name as well
     // gate.Utils.loadPlugin("ANNIE");

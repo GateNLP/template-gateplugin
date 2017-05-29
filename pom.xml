@@ -17,12 +17,12 @@
 		</license>
 	</licenses>
 
-	<dependencies>
-    <dependency>
+<dependencies>
+  <dependency>
       <groupId>uk.ac.gate</groupId>
       <artifactId>gate-core</artifactId>
       <version>8.4</version>
-    </dependency>
-    </dependencies>
+  </dependency>
+</dependencies>
 
 </project>
