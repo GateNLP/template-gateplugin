@@ -1,22 +1,28 @@
 /* 
  * YOUR LICENSE HEADER GOES HERE
  */
-
-
 package mypackage;
 
 
 import gate.*;
-import gate.api.AbstractDocumentProcessor;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ControllerAwarePR;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.util.GateRuntimeException;
-import java.util.List;
 import org.apache.log4j.Logger;
 
 @CreoleResource(name = "MyPluginPr",
         helpURL = "https://somehost.com/where/the/prdocu/is.html",
         comment = "A short description of what the plugin does.")
-public class MyPluginPr  extends AbstractDocumentProcessor {
+public class MyPluginPr  
+        extends AbstractLanguageAnalyser 
+        // only implement these if they are actually needed!
+        implements 
+        ControllerAwarePR    // only add if needed!
+        // , Benchmarkable   // only when Benchmarking is needed
+{
 
   private static final long serialVersionUID = 1L;
   
@@ -26,11 +32,11 @@ public class MyPluginPr  extends AbstractDocumentProcessor {
   @CreoleParameter(
           comment = "Input annotation set",
           defaultValue = "")
-  public void setInputAnnotationSet(String ias) {
+  public void setInputASName(String ias) {
     inputASName = ias;
   }
 
-  public String getInputAnnotationSet() {
+  public String getInputASName() {
     return inputASName;
   }
   
@@ -48,36 +54,57 @@ public class MyPluginPr  extends AbstractDocumentProcessor {
     return inputType;
   }
 
+  // Use a logger instead of System.out / System.err to make the output of the
+  // PR more configurable.
+  private final Logger logger = 
+          Logger.getLogger(getClass().getCanonicalName());  
+  
+  
+  // fields needed for the PR
   private int nDocs = 0;
   private int nAnns = 0;
 
   
   /**
-   * What to do right after the PR got created and initialized.
+   * Code to run once when/after the instance is created.
+   * Should be used sparingly and for one-time setup that only depends 
+   * on init time parameters. 
+   * @return the resource
+   * @throws ResourceInstantiationException 
    */
   @Override
-  public void afterCreate() {
-    
+  public Resource init() throws ResourceInstantiationException {
+    logger.info(getClass().getName()+": instance has been created");
+    return this;
   }
   
-  /**
-   * What to do before the first document is processed.
-   */
-  @Override
-  protected void beforeFirstDocument(Controller ctrl) {
+  // PR-local API methods...
+  
+  public void resetCounters() {
     nDocs = 0;
     nAnns = 0;
   }
-    
-  private Logger logger = Logger.getLogger(AbstractDocumentProcessor.class.getCanonicalName());  
+  
+  public int getNumberDocs() {
+    return nDocs;
+  }
+  
+  public int getNumberAnnotations() {
+    return nAnns;
+  }
 
   /**
    * Process the document.
    *
-   * @return 
+   * The field document is predefined and set by the caller to the document
+   * to be processed.
+   * <p>
+   * This uses the PR-local API methods.
+   * 
+   * @throws gate.creole.ExecutionException
    */
   @Override
-  public List<Document> process(Document document) {
+  public void execute() throws ExecutionException {
 
     // Implement the processing for each document here.
     // This short example code just counts the number of annotations with the 
@@ -97,38 +124,52 @@ public class MyPluginPr  extends AbstractDocumentProcessor {
     inputAnns = inputAS.get(inputType);
 
     // this will show/replace a progress message in the GATE GUI
-    fireStatusChanged("MyPluginPr: running on " + document.getName() + "...");
+    fireStatusChanged(getClass().getName()+": running on " + document.getName() + "...");
 
     int thisDocumentCount = 0;
-    for(Annotation ann : inputAnns) {
-      thisDocumentCount += 1;
-    }
+    thisDocumentCount += inputAnns.size();
+    // In order to iterate over Annotations use something like
+    //for(Annotation ann : inputAnns) {
+    //  // process the annotation, however cannot remove it inside a for loop
+    //}
    
     nDocs += 1;
     nAnns += thisDocumentCount; 
     
     
     fireProcessFinished();
-    fireStatusChanged("MyPluginPr: processing complete!");
-    return documentList(document);
+    fireStatusChanged(getClass().getName()+": processing complete!");
   }
   
-
+  // This should only be defined if ControllerAwarePR needs to be implemented.
+  // The method will get invoked when a pipeline is started. 
   @Override
-  protected void afterLastDocument(Controller ctrl, Throwable t) {
-    showResults();
+  public void controllerExecutionStarted(Controller ctrl) {
+    logger.info(getClass().getName()+" started");
+    resetCounters();
   }
 
+  // This should only be defined if ControllerAwarePR needs to be implemented.
+  // The method will get invoked when a pipeline is finishing.
   @Override
-  protected void processingFinished(Controller ctrl, Throwable t) {
-    showResults();
+  public void controllerExecutionFinished(Controller ctrl) {
+    logger.info(getClass().getName()+" finished normally");
+    logResults();
   }
 
-  private void showResults() {
-    logger.info("Documents as counted by the base class: "+getDocumentsProcessed());
-    logger.info("Number of documents: "+nDocs);
-    logger.info("Number of annotations: "+nAnns);
+  // This should only be defined if ControllerAwarePR needs to be implemented.
+  // The method will get invoked when a pipeline is aborted due to an exception.
+  @Override
+  public void controllerExecutionAborted(Controller ctrl, Throwable t) {
+    logger.info(getClass().getName()+" aborted");
+    logResults();
   }
+
+  private void logResults() {
+    logger.info("Number of documents: "+getNumberDocs());
+    logger.info("Number of annotations: "+getNumberAnnotations());
+  }
+    
   
 
 } // class MyPluginPr

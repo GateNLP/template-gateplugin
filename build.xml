@@ -1,4 +1,5 @@
-<project name="MyPlugin" basedir="."  default="build" >
+<project name="MyPlugin" basedir="."  default="jar" >
+
   <!-- Prevent Ant from warning about includeantruntime not being set -->
   <property name="build.sysclasspath" value="ignore" />
 
@@ -71,7 +72,9 @@
            srcdir="${src.dir}"
            destdir="${classes.dir}"
            debug="true"
-	   debuglevel="lines,source"
+	   debuglevel="lines,vars,source"
+           deprecation="on"
+           encoding="UTF-8"
 	   target="1.8"
            source="1.8" />
   </target>
@@ -82,7 +85,9 @@
            srcdir="${srctest.dir}"
            destdir="${classestest.dir}"
            debug="true"
-	   debuglevel="lines,source"
+	   debuglevel="lines,vars,source"
+           deprecation="on"
+           encoding="UTF-8"
 	   target="1.8"
            source="1.8" />
   </target>
@@ -129,6 +134,7 @@
   <!-- remove the generated .class files -->
   <target name="clean.classes" >
     <delete dir="${classes.dir}" />
+    <delete dir="${classestest.dir}" />
   </target>
 
   <!-- Clean up - remove .class and .jar files -->
