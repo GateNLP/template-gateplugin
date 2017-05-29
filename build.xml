@@ -139,7 +139,9 @@
 
   <!-- Clean up - remove .class and .jar files -->
   <target name="clean" depends="clean.classes" >
-    <delete file="${jar.location}" />
+	  <delete file="${jar.location}" />
+	  <delete file="TEST-mypackage.SuiteAllTests.txt" />
+	  <delete file="TEST-mypackage.SuiteAllTests.xml" />
   </target>
 
   <!-- Targets used by the main GATE build file:
