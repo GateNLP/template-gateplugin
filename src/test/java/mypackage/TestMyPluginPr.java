@@ -46,12 +46,13 @@ public class TestMyPluginPr {
     // gate.Utils.loadPlugin("ANNIE");
     
     // Load our plugin
-    Utils.loadPlugin(new File("."));
+    File curDir = new File(".");
+    Utils.loadPlugin(curDir);
   }
   
   @Test
   public void testPluginApi1() throws ResourceInstantiationException, ExecutionException {
-    // create an instance of the PR
+    // create an instance of the PR    
     MyPluginPr mypr = 
             (MyPluginPr)Factory.createResource(
             "mypackage.MyPluginPr",  // the full name of the resource class 
