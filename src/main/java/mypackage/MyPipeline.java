@@ -13,7 +13,7 @@ import gate.creole.metadata.CreoleResource;
 /**
  * Example packaged controller for the PR.
  * 
- * @author 
+ * @author Johann Petrak
  */
 @CreoleResource(
         name = "MyPlugin",

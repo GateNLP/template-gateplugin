@@ -13,6 +13,11 @@ import gate.creole.metadata.*;
 import gate.util.GateRuntimeException;
 import org.apache.log4j.Logger;
 
+/**
+ * Template PR file.
+ * 
+ * @author Johann Petrak
+ */
 @CreoleResource(name = "MyPluginPr",
         helpURL = "https://somehost.com/where/the/prdocu/is.html",
         comment = "A short description of what the plugin does.")
@@ -70,7 +75,7 @@ public class MyPluginPr
    * Should be used sparingly and for one-time setup that only depends 
    * on init time parameters. 
    * @return the resource
-   * @throws ResourceInstantiationException 
+   * @throws ResourceInstantiationException if instance cannot be created
    */
   @Override
   public Resource init() throws ResourceInstantiationException {
@@ -101,15 +106,15 @@ public class MyPluginPr
    * <p>
    * This uses the PR-local API methods.
    * 
-   * @throws gate.creole.ExecutionException
+   * @throws gate.creole.ExecutionException if execution gets aborted.
    */
   @Override
   public void execute() throws ExecutionException {
 
-    // Implement the processing for each document here.
-    // This short example code just counts the number of annotations with the 
-    // type and in the set specified as parameters that occur in the document.
-    
+      // Implement the processing for each document here.
+      // This short example code just counts the number of annotations with the
+      // type and in the set specified as parameters that occur in the document.
+
     AnnotationSet inputAS;
     if (inputASName == null || inputASName.isEmpty()) {
       inputAS = document.getAnnotations();
@@ -136,6 +141,14 @@ public class MyPluginPr
     nDocs += 1;
     nAnns += thisDocumentCount; 
     
+    // The PR should react to the request of being interrupted, which should be
+    // handled by throwing an exception (which will also interrupt the pipeline).
+    // The interrupt flag is not automatically reset, so we reset it before throwing
+    // the exception so that the pipeline can be restarted later.
+    if(isInterrupted()) {
+      interrupted = false;
+      throw new ExecutionException(getClass().getName()+"Has been interrupted");
+    }
     
     fireProcessFinished();
     fireStatusChanged(getClass().getName()+": processing complete!");
