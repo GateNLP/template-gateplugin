@@ -73,7 +73,7 @@ public class MyPluginPr
   /**
    * Code to run once when/after the instance is created.
    * Should be used sparingly and for one-time setup that only depends 
-   * on init time parameters. 
+   * on init time parameters. Can be removed if not needed.
    * @return the resource
    * @throws ResourceInstantiationException if instance cannot be created
    */
@@ -82,6 +82,25 @@ public class MyPluginPr
     logger.info(getClass().getName()+": instance has been created");
     return this;
   }
+  
+  /**
+   * Code to run if an existing instance gets re-initialized.
+   * Rarely needed and can be removed if not needed.
+   */
+  @Override
+  public void reInit() {
+    logger.info(getClass().getName()+": instance has been re-initialized");
+  }
+  
+  /**
+   * Code to run before the instance gets destroyed.
+   * Rarely needed and can be removed if not needed.
+   */
+  @Override
+  public void cleanup() {
+    logger.info(getClass().getName()+": cleaning up instance");
+  }
+  
   
   // PR-local API methods...
   
