@@ -4,5 +4,6 @@
   DESCRIPTION="Short Description"
   HELPURL="https://some.webpage.com/where/the/plugin/doc.is"
 >
-  <JAR scan="true">MyPlugin.jar</JAR>
+<JAR scan="true">MyPlugin.jar</JAR>
+<!-- <JAR>lib/someNeededJar.jar</JAR> -->
 </CREOLE-DIRECTORY>
