@@ -2,7 +2,7 @@
 
 This is a small illustrative template project for how to get started with creating a plugin for GATE version 8.4. This should also work for earlier versions, though may need some adaptations.
 
-The template plugin should work straight away. Just clone it from Git and compile by running `ant` in the root directory. You can then run the test application in GATE Developer, or load the plugin to include the template PR in your own application. (To load the plugin, set your plugin directory in the plugin manager in GATE Developer to point to the parent directory containing the template plugin.)
+The template plugin should work straight away. Just clone it from GitHub and compile by running `ant` in the root directory. You can then run the test application in GATE Developer, or load the plugin to include the template PR in your own application. (To load the plugin, set your plugin directory in the plugin manager in GATE Developer to point to the parent directory containing the template plugin.)
 
 The code for the PR is contained in the file `src/main/java/mypackage/MyPluginPr.java`. Currently it performs a simple annotation counting task. You can edit this to perform your task. Documentation to support you in using the GATE API can be found here:
 
