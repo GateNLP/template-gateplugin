@@ -14,6 +14,8 @@ The `execute` method runs on each document. The document is bound to the variabl
 
 `src/main/java/mypackage/MyPipeline.java` is code that makes a ready made application available in the GUI when you load the plugin. If you right click on "Applications" and select "Ready Made Applications", your application will appear there. An example application is included in the `application` directory. It is entirely optional, but nice to have in some cases.
 
+Example tests are also included. These also provide an example of working with GATE applications and documents via the API, for example to embed your GATE work in a larger Java application.
+
 There are several files in the root directory:
 * `build.properties.template` should be edited to point to your GATE installation. You should already have set the environmental variable "GATE_HOME" to point to your GATE installation, in which case the one in this file probably won't be used, except for in certain cases.
 * `build.xml` shouldn't require any editing, other than to rename your plugin.
