@@ -12,9 +12,11 @@ The code for the PR is contained in the file `src/main/java/mypackage/MyPluginPr
 
 The `execute` method runs on each document. The document is bound to the variable `document`. If you want to run code at the beginning or end of the whole corpus, you may do so in the `controllerExecutionStarted` and `controllerExecutionFinished` methods. These latter two methods are part of the `ControllerAwarePR` parent class. Global variables may be used to implement functionality that spans the whole task. For example, a simple counting task is demonstrated in the example code using global variables.
 
-`src/main/java/mypackage/MyPipeline.java` is code that makes a ready made application available in the GUI when you load the plugin. If you right click on "Applications" and select "Ready Made Applications", your application will appear there. An example application is included in the `application` directory. It is entirely optional, but nice to have in some cases.
+`src/main/java/mypackage/MyPipeline.java` is code that makes a ready made application available in the GUI when you load the plugin. If you right click on "Applications" and select "Ready Made Applications", your application will appear there. An example application is included in the `application` directory. It is entirely optional, but nice to have in some cases. The screenshot below shows how the application will appear in GATE Developer.
 
-Example tests are also included. These also provide an example of working with GATE applications and documents via the API, for example to embed your GATE work in a larger Java application.
+![GATE Developer ready made application screenshot](https://github.com/GateNLP/template-gateplugin/blob/master/images/ready-made-app.png "GATE Developer ready made application screenshot")
+
+Example tests are also included. In addition to illustrating how you can write tests for your plugin, these also provide an example of working with GATE applications and documents via the API, for example to embed your GATE work in a larger Java application.
 
 There are several files in the root directory:
 * `build.properties.template` should be edited to point to your GATE installation. You should already have set the environmental variable "GATE_HOME" to point to your GATE installation, in which case the one in this file probably won't be used, except for in certain cases.
